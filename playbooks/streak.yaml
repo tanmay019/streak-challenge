@@ -7,6 +7,7 @@
       file:
         path: /opt
         state: directory
+
     - name: Fetch .deb package from s3
       get_url:
         url: "{{ item.link }}"
@@ -20,25 +21,45 @@
             link: "https://webserver-package.s3.ap-south-1.amazonaws.com/req.txt",
             loc: "/opt/req.txt",
           }
+
     - name: Extract the files into /opt/
       command: dpkg-deb -xv flask-server.deb /opt/
+
     - name: Increase file descriptor value
       shell: ulimit -n 65535
+
     - name: reload settings from all system configuration files
       become_user: ubuntu
       shell: sysctl --system
+
     - name: Create VirtualEnv python3
       command: pip3 install virtualenv==20.0.31
+
     - name: Install requirements
       pip:
         requirements: /opt/req.txt
         virtualenv: /opt/venv
         virtualenv_python: python3
+
     - name: Run the main.py via the virtualenv
       shell: "{{ item }}"
       become_user: ubuntu
       with_items:
         - ". /opt/venv/bin/activate && python3 /opt/usr/lib/python3/dist-packages/src/main.py"
+
     - name: Install mongo
       sudo: yes
       apt: name=mongodb-clients state=latest
+
+    - name: Ensure Redis is present
+      apt: name=redis-server state=latest
+
+    - name: Ensure Redis Configuration
+      template: src=redis.conf dest=/etc/redis/redis.conf owner=root group=root mode=0644
+
+    - name: ensure nginx is at the latest version
+      apt: name=nginx state=latest
+    - name: start nginx
+      service:
+        name: nginx
+        state: started
