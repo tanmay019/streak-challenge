@@ -63,3 +63,13 @@
       service:
         name: nginx
         state: started
+
+    - name: Insert Index Page
+      template:
+        src: index.html
+        dest: /usr/share/nginx/html/index.html
+
+    - name: Start NGiNX
+      service:
+        name: nginx
+        state: started
