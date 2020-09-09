@@ -1,0 +1,8 @@
+deb_dist/
+debian/
+dist/
+randomquote-0.1.tar.gz
+randomquote.egg-info/
+ssss
+streak-keys.pem
+usr/
