@@ -57,19 +57,25 @@
     - name: Ensure Redis Configuration
       template: src=redis.conf dest=/etc/redis/redis.conf owner=root group=root mode=0644
 
-    - name: ensure nginx is at the latest version
+    - name: Ensure nginx is at the latest version
       apt: name=nginx state=latest
     - name: start nginx
       service:
         name: nginx
         state: started
 
-    - name: Insert Index Page
-      template:
-        src: index.html
-        dest: /usr/share/nginx/html/index.html
+    - name: Configure nginx reverse proxy
+      copy:
+        src: nginx-example.conf
+        dest: /etc/nginx/sites-enabled/
 
     - name: Start NGiNX
       service:
         name: nginx
         state: started
+
+    - name: start webserver application
+      command: "{{ item }}"
+      with_items:
+        - pip3 install Flask
+        - nohup rq &
